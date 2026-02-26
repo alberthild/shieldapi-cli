@@ -1,8 +1,10 @@
 import { createHash } from 'node:crypto';
 import ora from 'ora';
+import chalk from 'chalk';
 import { apiRequest } from '../lib/api.js';
 import { resolveWallet } from '../lib/wallet.js';
 import { formatScan } from '../lib/formatter.js';
+import { exitCodeFromResult, exitCodeFromError, EXIT } from '../lib/exit.js';
 
 /**
  * Run a full security scan with multiple targets.
@@ -19,12 +21,12 @@ export async function scanCommand(opts) {
   if (opts.url) params.url = opts.url;
 
   if (Object.keys(params).length === 0) {
-    console.error('Error: At least one target required. Use --email, --password, --domain, --ip, or --url.');
-    process.exitCode = 1;
+    process.stderr.write(chalk.red('Error: At least one target required. Use --email, --password, --domain, --ip, or --url.\n'));
+    process.exitCode = EXIT.USAGE;
     return;
   }
 
-  const spinner = ora('Running full security scan...').start();
+  const spinner = opts.quiet ? null : ora({ text: 'Running full security scan...', stream: process.stderr }).start();
 
   try {
     const wallet = opts.demo ? null : resolveWallet(opts);
@@ -34,15 +36,17 @@ export async function scanCommand(opts) {
       wallet,
     });
 
-    spinner.stop();
+    spinner?.stop();
 
     if (opts.json) {
       console.log(JSON.stringify(data, null, 2));
     } else {
       formatScan(data);
     }
+
+    process.exitCode = exitCodeFromResult(data);
   } catch (err) {
-    spinner.fail(err.message);
-    process.exitCode = 1;
+    spinner?.fail(err.message);
+    process.exitCode = exitCodeFromError(err);
   }
 }

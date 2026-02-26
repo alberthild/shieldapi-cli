@@ -2,7 +2,7 @@
 
 **Security intelligence from your terminal. Pay-per-request with USDC.**
 
-Check passwords, emails, domains, IPs, and URLs against breach databases and threat intelligence — powered by [x402](https://x402.org) micropayments. No API key. No subscription. Just pay per request with USDC on Base.
+The first x402-powered security CLI. Check passwords, emails, domains, IPs, and URLs against breach databases, blacklists, and threat intelligence — no API keys, no subscriptions, just crypto micropayments.
 
 ## Install
 
@@ -10,138 +10,157 @@ Check passwords, emails, domains, IPs, and URLs against breach databases and thr
 npm install -g @vainplex/shieldapi-cli
 ```
 
+Or use directly with npx:
+```bash
+npx @vainplex/shieldapi-cli password "test123" --demo
+```
+
 ## Quick Start
 
 ### Demo Mode (free, no wallet needed)
 
 ```bash
-# Check a password
+# Check if a password has been breached
 shieldapi password "hunter2" --demo
 
-# Check an email
+# Check email for breaches
 shieldapi email "test@example.com" --demo
 
-# Check a domain
+# Check domain reputation
 shieldapi domain "example.com" --demo
 
-# Check an IP
+# Check IP reputation
 shieldapi ip "8.8.8.8" --demo
 
-# Check a URL
-shieldapi url "https://example.com" --demo
+# Check URL safety
+shieldapi url "https://suspicious-site.com" --demo
 
 # Full security scan
-shieldapi scan --email "test@example.com" --password "hunter2" --domain "example.com" --demo
+shieldapi scan --email "test@example.com" --domain "example.com" --demo
 
-# Check API health
-shieldapi health
+# Compute SHA-1 hash locally (offline, free)
+shieldapi hash "mypassword"
 ```
 
-### Paid Mode (real data, USDC micropayments)
+### Paid Mode (real data, USDC on Base)
 
 ```bash
-# Set your wallet key (Base network, needs USDC)
-export SHIELDAPI_WALLET_KEY="your-private-key-hex"
+# Set your wallet key
+export SHIELDAPI_WALLET_KEY="0x..."
 
-# Or pass it directly
-shieldapi password "mysecretpassword" --wallet "0xabc..."
+# Real breach check — costs $0.001 USDC
+shieldapi password "hunter2"
 
-# Check for real breaches
-shieldapi email "albert@company.com"
-
-# Full scan
-shieldapi scan --email "me@company.com" --domain "company.com" --ip "203.0.113.1"
+# Or pass wallet inline
+shieldapi email "ceo@company.com" --wallet "0x..."
 ```
 
 ## Commands
 
-| Command | Description | Cost |
-|---------|-------------|------|
-| `password <pw>` | Check password against HIBP (hashed locally) | 0.001 USDC |
-| `email <email>` | Email breach lookup | 0.005 USDC |
-| `domain <domain>` | Domain reputation (DNS, blacklists, SSL, SPF/DMARC) | 0.003 USDC |
-| `ip <ip>` | IP reputation (blacklists, Tor, rDNS) | 0.002 USDC |
-| `url <url>` | URL safety (phishing, malware, brand impersonation) | 0.003 USDC |
-| `scan [options]` | Full scan (combine multiple checks) | 0.01 USDC |
-| `health` | Check API status | Free |
+| Command | Description | Cost (USDC) |
+|---------|-------------|-------------|
+| `password <pw>` | Check password against 900M+ breach records | $0.001 |
+| `email <addr>` | Email breach lookup with risk scoring | $0.005 |
+| `domain <name>` | DNS, blacklists, SSL, SPF/DMARC analysis | $0.003 |
+| `ip <addr>` | Blacklists, Tor exit node, reverse DNS | $0.002 |
+| `url <url>` | Phishing, malware, brand impersonation | $0.003 |
+| `scan` | Full scan (combine any targets) | $0.01 |
+| `health` | API status and pricing | Free |
+| `hash <pw>` | SHA-1 hash (offline, no API call) | Free |
 
-## Global Flags
+## Global Options
 
 | Flag | Description |
 |------|-------------|
-| `--demo` | Use demo mode (free, returns realistic fake data) |
 | `--wallet <key>` | Private key for x402 payments |
-| `--json` | Output raw JSON instead of formatted output |
-| `--no-color` | Disable colored output |
-| `--help` | Show help |
-| `--version` | Show version |
+| `--demo` | Use demo mode (free, fake data) |
+| `--json` | Output raw JSON (for CI/CD and agents) |
+| `--yes, -y` | Skip payment confirmation prompts |
+| `--quiet, -q` | Suppress spinners and warnings |
+| `--no-color` | Disable ANSI colors |
+| `--version, -V` | Show version |
+| `--help, -h` | Show help |
 
-## How Payments Work
+### Password-specific Options
 
-ShieldAPI uses the [x402 protocol](https://x402.org) for pay-per-request micropayments:
+| Flag | Description |
+|------|-------------|
+| `--stdin` | Read password from stdin (avoids shell history) |
+| `--hash` | Treat input as pre-computed SHA-1 hash |
 
-1. **No account needed** — just a wallet with USDC on Base
-2. **Request → 402 → Pay → Data** — automatic payment flow handled by the CLI
-3. **Costs are tiny** — from $0.001 to $0.01 per request
-4. **Demo mode available** — try everything free with `--demo`
+## Exit Codes
 
-### Setting Up a Wallet
+Designed for CI/CD pipelines and AI agents:
 
-You need a wallet with USDC on [Base](https://base.org) (Coinbase's L2):
-
-```bash
-# Set via environment variable (recommended)
-export SHIELDAPI_WALLET_KEY="your-hex-private-key"
-
-# Or pass per-command
-shieldapi email "test@example.com" --wallet "0x..."
-```
-
-> ⚠️ **Security:** Never commit your private key to version control. Use environment variables.
-
-## Output Examples
-
-### Password Check
-```
-🔍 Checking password...
-
-⚠️  PASSWORD COMPROMISED
-   Found in 52,256,179 breaches
-   SHA-1: 5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8
-
-   🚨 Change this password immediately!
-```
-
-### Email Breach Check
-```
-🔍 Checking email: test@linkedin.com
-
-⚠️  3 breaches found | Risk: HIGH (8.5/10)
-
-   📋 LinkedIn (2012) — 164,000,000 accounts
-      Exposed: emails, passwords
-   📋 LinkedIn Scrape (2021) — 125,000,000 accounts
-      Exposed: emails, names, job titles
-
-   💡 Recommendations:
-      • Change passwords on affected services
-      • Enable 2FA where possible
-```
-
-## JSON Output
-
-Pipe results into other tools with `--json`:
+| Code | Meaning |
+|------|---------|
+| `0` | Safe — no risk found |
+| `1` | Risk — breaches, threats, or high risk detected |
+| `2` | Usage error — invalid arguments |
+| `3` | Network error — API unreachable |
+| `4` | Payment error — insufficient USDC or wallet issue |
 
 ```bash
-shieldapi email "test@example.com" --demo --json | jq '.risk_score'
+# Use in CI/CD
+shieldapi password "$DB_PASSWORD" --json --quiet --yes
+if [ $? -eq 1 ]; then
+  echo "COMPROMISED PASSWORD DETECTED"
+  exit 1
+fi
 ```
+
+## Security
+
+- **Passwords are hashed locally** with SHA-1 before any network request. Plaintext never leaves your machine.
+- **Private keys are never persisted** to disk, logs, or displayed in output.
+- **No telemetry** — zero phone-home, zero analytics.
+- **Shell history warning** — the CLI warns when passwords are passed as arguments (use `--stdin` for sensitive passwords).
+
+```bash
+# Secure password checking (avoids shell history)
+echo "mysecretpassword" | shieldapi password dummy --stdin
+```
+
+## How x402 Works
+
+[x402](https://x402.org) is an open protocol for HTTP payments. Instead of API keys:
+
+1. You make a request → server returns `HTTP 402` with payment requirements
+2. Your wallet signs a USDC payment authorization
+3. Request is retried with payment proof in headers
+4. Server verifies payment and returns data
+
+All of this happens automatically. You just need a wallet with USDC on Base.
+
+## For AI Agents
+
+ShieldAPI CLI is designed for autonomous agent usage:
+
+```bash
+# JSON output for structured parsing
+shieldapi password "test" --demo --json
+
+# Quiet mode suppresses all stderr
+shieldapi domain "example.com" --demo --json --quiet
+
+# Exit codes for decision making
+shieldapi ip "1.2.3.4" --demo --quiet
+echo $?  # 0 = safe, 1 = risk
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `SHIELDAPI_WALLET_KEY` | Private key (hex, with or without 0x prefix) |
+| `NO_COLOR` | Disable colors (standard) |
 
 ## Links
 
-- 🌐 **API:** [shield.vainplex.dev](https://shield.vainplex.dev)
-- 📖 **x402 Protocol:** [x402.org](https://x402.org)
-- 🐛 **Issues:** [GitHub Issues](https://github.com/vainplex/shieldapi-cli/issues)
+- **API**: https://shield.vainplex.dev
+- **x402 Protocol**: https://x402.org
+- **GitHub**: https://github.com/vainplex/shieldapi-cli
 
 ## License
 
-MIT © [Albert Hild](https://linkedin.com/in/albert-hild)
+MIT © Albert Hild

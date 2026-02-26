@@ -6,23 +6,28 @@ import { ipCommand } from './commands/ip.js';
 import { urlCommand } from './commands/url.js';
 import { scanCommand } from './commands/scan.js';
 import { healthCommand } from './commands/health.js';
+import { hashCommand } from './commands/hash.js';
 
 export function run(argv) {
   const program = new Command();
 
   program
     .name('shieldapi')
-    .description('🛡️  ShieldAPI CLI — Security intelligence from your terminal')
-    .version('1.0.0')
+    .description('🛡️  ShieldAPI CLI — Security intelligence from your terminal. Pay-per-request with USDC.')
+    .version('1.1.0')
     .option('--wallet <key>', 'Private key for x402 payments (or set SHIELDAPI_WALLET_KEY)')
     .option('--json', 'Output raw JSON instead of formatted output')
-    .option('--no-color', 'Disable colors');
+    .option('--no-color', 'Disable colors')
+    .option('-y, --yes', 'Skip payment confirmation prompts')
+    .option('-q, --quiet', 'Suppress non-essential output (spinners, warnings)');
 
   program
     .command('password')
     .description('Check a password against breach databases')
     .argument('<password>', 'Password to check (hashed locally with SHA-1)')
     .option('--demo', 'Use demo mode (free, no wallet needed)')
+    .option('--stdin', 'Read password from stdin (avoids shell history)')
+    .option('--hash', 'Treat input as pre-computed SHA-1 hash')
     .action((password, cmdOpts, cmd) => {
       const globalOpts = cmd.parent.opts();
       passwordCommand(password, { ...globalOpts, ...cmdOpts });
@@ -89,6 +94,15 @@ export function run(argv) {
     .action((cmdOpts, cmd) => {
       const globalOpts = cmd.parent.opts();
       healthCommand({ ...globalOpts, ...cmdOpts });
+    });
+
+  program
+    .command('hash')
+    .description('Compute SHA-1 hash locally (offline, no API call)')
+    .argument('<password>', 'Password to hash')
+    .action((password, cmdOpts, cmd) => {
+      const globalOpts = cmd.parent.opts();
+      hashCommand(password, { ...globalOpts, ...cmdOpts });
     });
 
   program.parse(argv);
