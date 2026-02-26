@@ -31,7 +31,7 @@ export function createWallet(privateKey) {
 
     return { signer, address: account.address };
   } catch (err) {
-    throw new Error(`Invalid private key: ${err.message}`);
+    throw new Error('Invalid private key. Expected 64 hex characters (with or without 0x prefix).');
   }
 }
 

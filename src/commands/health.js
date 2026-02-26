@@ -1,5 +1,4 @@
 import ora from 'ora';
-import chalk from 'chalk';
 import { apiRequest } from '../lib/api.js';
 import { formatHealth } from '../lib/formatter.js';
 import { EXIT } from '../lib/exit.js';

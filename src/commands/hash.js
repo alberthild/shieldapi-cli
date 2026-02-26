@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import chalk from 'chalk';
+import { EXIT } from '../lib/exit.js';
 
 /**
  * Compute SHA-1 hash locally (offline, no API call).
@@ -16,4 +17,6 @@ export async function hashCommand(password, opts) {
     console.log(`   Length: ${password.length} characters`);
     console.log();
   }
+
+  process.exitCode = EXIT.SAFE;
 }

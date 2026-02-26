@@ -13,6 +13,12 @@ export async function scanCommand(opts) {
   const params = {};
 
   if (opts.password) {
+    // Shell history warning (C2: scan --password leak)
+    if (!opts.quiet && process.stderr.isTTY) {
+      process.stderr.write(
+        chalk.yellow('⚠  Password may appear in shell history. Use `shieldapi password --stdin` for sensitive passwords.\n')
+      );
+    }
     params.password_hash = createHash('sha1').update(opts.password).digest('hex').toUpperCase();
   }
   if (opts.email) params.email = opts.email;

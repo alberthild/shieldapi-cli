@@ -51,14 +51,28 @@ function readStdin() {
     } else {
       // Piped mode: read all data from stdin
       let data = '';
+      let resolved = false;
       process.stdin.setEncoding('utf8');
       process.stdin.on('data', (chunk) => { data += chunk; });
-      process.stdin.on('end', () => resolve(data.trim()));
-      process.stdin.on('error', reject);
+      process.stdin.on('end', () => {
+        if (!resolved) {
+          resolved = true;
+          resolve(data.trim());
+        }
+      });
+      process.stdin.on('error', (err) => {
+        if (!resolved) {
+          resolved = true;
+          reject(err);
+        }
+      });
       setTimeout(() => {
-        process.stdin.destroy();
-        if (data) resolve(data.trim());
-        else reject(new Error('Stdin timeout — no input received'));
+        if (!resolved) {
+          resolved = true;
+          process.stdin.destroy();
+          if (data) resolve(data.trim());
+          else reject(new Error('Stdin timeout — no input received'));
+        }
       }, 10000);
     }
   });

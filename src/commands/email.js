@@ -1,35 +1,18 @@
-import ora from 'ora';
-import chalk from 'chalk';
-import { apiRequest } from '../lib/api.js';
-import { resolveWallet } from '../lib/wallet.js';
+import { runCommand } from '../lib/command.js';
 import { formatEmail } from '../lib/formatter.js';
-import { exitCodeFromResult, exitCodeFromError } from '../lib/exit.js';
+import { isValidEmail } from '../lib/validator.js';
 
 /**
  * Check an email address for breaches.
  */
 export async function emailCommand(email, opts) {
-  const spinner = opts.quiet ? null : ora({ text: `Checking email: ${email}`, stream: process.stderr }).start();
-
-  try {
-    const wallet = opts.demo ? null : resolveWallet(opts);
-
-    const data = await apiRequest('check-email', { email }, {
-      demo: opts.demo,
-      wallet,
-    });
-
-    spinner?.stop();
-
-    if (opts.json) {
-      console.log(JSON.stringify(data, null, 2));
-    } else {
-      formatEmail(data, email);
-    }
-
-    process.exitCode = exitCodeFromResult(data);
-  } catch (err) {
-    spinner?.fail(err.message);
-    process.exitCode = exitCodeFromError(err);
-  }
+  await runCommand({
+    endpoint: 'check-email',
+    paramName: 'email',
+    paramValue: email,
+    formatFn: formatEmail,
+    spinnerText: `Checking email: ${email}`,
+    validateFn: isValidEmail,
+    validateMsg: `Invalid email: "${email}". Expected format: user@example.com.`,
+  }, opts);
 }

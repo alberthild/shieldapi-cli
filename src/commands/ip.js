@@ -1,35 +1,18 @@
-import ora from 'ora';
-import chalk from 'chalk';
-import { apiRequest } from '../lib/api.js';
-import { resolveWallet } from '../lib/wallet.js';
+import { runCommand } from '../lib/command.js';
 import { formatIp } from '../lib/formatter.js';
-import { exitCodeFromResult, exitCodeFromError } from '../lib/exit.js';
+import { isValidIPv4 } from '../lib/validator.js';
 
 /**
  * Check IP reputation.
  */
 export async function ipCommand(ip, opts) {
-  const spinner = opts.quiet ? null : ora({ text: `Checking IP: ${ip}`, stream: process.stderr }).start();
-
-  try {
-    const wallet = opts.demo ? null : resolveWallet(opts);
-
-    const data = await apiRequest('check-ip', { ip }, {
-      demo: opts.demo,
-      wallet,
-    });
-
-    spinner?.stop();
-
-    if (opts.json) {
-      console.log(JSON.stringify(data, null, 2));
-    } else {
-      formatIp(data);
-    }
-
-    process.exitCode = exitCodeFromResult(data);
-  } catch (err) {
-    spinner?.fail(err.message);
-    process.exitCode = exitCodeFromError(err);
-  }
+  await runCommand({
+    endpoint: 'check-ip',
+    paramName: 'ip',
+    paramValue: ip,
+    formatFn: formatIp,
+    spinnerText: `Checking IP: ${ip}`,
+    validateFn: isValidIPv4,
+    validateMsg: `Invalid IPv4 address: "${ip}". Expected format: 1.2.3.4.`,
+  }, opts);
 }

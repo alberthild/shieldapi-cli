@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { Command } from 'commander';
 import { passwordCommand } from './commands/password.js';
 import { emailCommand } from './commands/email.js';
@@ -8,17 +11,19 @@ import { scanCommand } from './commands/scan.js';
 import { healthCommand } from './commands/health.js';
 import { hashCommand } from './commands/hash.js';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
+
 export function run(argv) {
   const program = new Command();
 
   program
     .name('shieldapi')
     .description('🛡️  ShieldAPI CLI — Security intelligence from your terminal. Pay-per-request with USDC.')
-    .version('1.3.1')
+    .version(pkg.version)
     .option('--wallet <key>', 'Private key for x402 payments (or set SHIELDAPI_WALLET_KEY)')
     .option('--json', 'Output raw JSON instead of formatted output')
     .option('--no-color', 'Disable colors')
-    .option('-y, --yes', 'Skip payment confirmation prompts')
     .option('-q, --quiet', 'Suppress non-essential output (spinners, warnings)');
 
   program
