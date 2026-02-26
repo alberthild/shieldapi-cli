@@ -109,17 +109,41 @@ if [ $? -eq 1 ]; then
 fi
 ```
 
-## Security
+## Security & Privacy
 
-- **Passwords are hashed locally** with SHA-1 before any network request. Plaintext never leaves your machine.
-- **Private keys are never persisted** to disk, logs, or displayed in output.
-- **No telemetry** — zero phone-home, zero analytics.
-- **Shell history warning** — the CLI warns when passwords are passed as arguments (use `--stdin` for sensitive passwords).
+### Your password never leaves your machine in plaintext
+
+1. Your password is **SHA-1 hashed locally** on your machine — plaintext never touches the network.
+2. The SHA-1 hash is sent over **HTTPS** to the ShieldAPI server.
+3. The server uses the [HIBP k-Anonymity protocol](https://haveibeenpwned.com/API/v3#SearchingPwnedPasswordsByRange) — only the **first 5 characters** of the hash go to the upstream breach database. The full hash never leaves ShieldAPI.
+
+**Want true end-to-end k-Anonymity?** Use the `check-password-range` endpoint directly via the API — it only accepts a 5-character prefix and returns all matching suffixes, so you can check locally.
+
+### Avoiding shell history exposure
+
+Passing a password as a CLI argument stores it in your shell history (`~/.bash_history`). Use these safer alternatives:
 
 ```bash
-# Secure password checking (avoids shell history)
-echo "mysecretpassword" | shieldapi password dummy --stdin
+# Option 1: Read from stdin (recommended)
+read -sp "Password: " PW && echo -n "$PW" | shieldapi password dummy --stdin --demo
+
+# Option 2: Pipe directly
+echo -n "mypassword" | shieldapi password dummy --stdin --demo
+
+# Option 3: Hash first, then check the hash
+shieldapi hash "mypassword"           # → shows SHA-1 locally
+shieldapi password "7C6A18..." --hash --demo  # check by hash, not password
+
+# Option 4: Clear history after
+shieldapi password "test" --demo && history -d $(history 1 | awk '{print $1}')
 ```
+
+### Other security guarantees
+
+- **Private keys are never persisted** to disk, logs, or displayed in output.
+- **No telemetry** — zero phone-home, zero analytics.
+- **HTTPS only** — all API communication is encrypted.
+- **Shell history warning** — the CLI warns when passwords are passed as arguments.
 
 ## How x402 Works
 
