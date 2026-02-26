@@ -13,11 +13,15 @@ import { exitCodeFromResult, exitCodeFromError, EXIT } from '../lib/exit.js';
 function readStdin() {
   return new Promise((resolve, reject) => {
     let data = '';
-    const rl = createInterface({ input: process.stdin });
-    rl.on('line', (line) => { data = line; rl.close(); });
-    rl.on('close', () => resolve(data.trim()));
-    rl.on('error', reject);
-    setTimeout(() => { rl.close(); reject(new Error('Stdin timeout — no input received')); }, 10000);
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (chunk) => { data += chunk; });
+    process.stdin.on('end', () => resolve(data.trim()));
+    process.stdin.on('error', reject);
+    setTimeout(() => {
+      process.stdin.destroy();
+      if (data) resolve(data.trim());
+      else reject(new Error('Stdin timeout — no input received'));
+    }, 10000);
   });
 }
 
@@ -31,8 +35,8 @@ export async function passwordCommand(password, opts) {
   try {
     let hash;
 
-    // --stdin: read password from stdin
     if (opts.stdin) {
+      // --stdin: read password from stdin, ignore positional argument
       if (!opts.quiet) {
         process.stderr.write(chalk.gray('Reading password from stdin...\n'));
       }
@@ -43,6 +47,13 @@ export async function passwordCommand(password, opts) {
         return;
       }
       hash = createHash('sha1').update(stdinPassword).digest('hex').toUpperCase();
+    } else if (!password) {
+      // No password argument and no --stdin
+      process.stderr.write(chalk.red('Error: Provide a password argument or use --stdin.\n'));
+      process.stderr.write(chalk.gray('  shieldapi password "mypassword" --demo\n'));
+      process.stderr.write(chalk.gray('  echo -n "mypassword" | shieldapi password --stdin --demo\n'));
+      process.exitCode = EXIT.USAGE;
+      return;
     } else if (opts.hash) {
       // --hash: treat input as pre-computed SHA-1
       hash = password.toUpperCase();
@@ -56,7 +67,7 @@ export async function passwordCommand(password, opts) {
       hash = createHash('sha1').update(password).digest('hex').toUpperCase();
 
       // Shell history warning (SR-5)
-      if (!opts.quiet && process.stdout.isTTY) {
+      if (!opts.quiet && process.stderr.isTTY) {
         process.stderr.write(
           chalk.yellow('⚠  Password may appear in shell history. Use --stdin for sensitive passwords.\n')
         );

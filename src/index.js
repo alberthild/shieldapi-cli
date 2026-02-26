@@ -14,7 +14,7 @@ export function run(argv) {
   program
     .name('shieldapi')
     .description('🛡️  ShieldAPI CLI — Security intelligence from your terminal. Pay-per-request with USDC.')
-    .version('1.2.2')
+    .version('1.3.0')
     .option('--wallet <key>', 'Private key for x402 payments (or set SHIELDAPI_WALLET_KEY)')
     .option('--json', 'Output raw JSON instead of formatted output')
     .option('--no-color', 'Disable colors')
@@ -24,7 +24,7 @@ export function run(argv) {
   program
     .command('password')
     .description('Check a password against breach databases')
-    .argument('<password>', 'Password to check (hashed locally with SHA-1)')
+    .argument('[password]', 'Password to check (hashed locally with SHA-1)')
     .option('--demo', 'Use demo mode (free, no wallet needed)')
     .option('--stdin', 'Read password from stdin (avoids shell history)')
     .option('--hash', 'Treat input as pre-computed SHA-1 hash')
