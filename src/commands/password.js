@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto';
-import { createInterface } from 'node:readline';
 import ora from 'ora';
 import chalk from 'chalk';
 import { apiRequest } from '../lib/api.js';
@@ -8,20 +7,60 @@ import { formatPassword } from '../lib/formatter.js';
 import { exitCodeFromResult, exitCodeFromError, EXIT } from '../lib/exit.js';
 
 /**
- * Read a line from stdin (for --stdin mode).
+ * Read password from stdin.
+ * If stdin is a TTY (interactive), prompts with hidden input (like Linux `read -s`).
+ * If piped, reads data directly.
  */
 function readStdin() {
   return new Promise((resolve, reject) => {
-    let data = '';
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (chunk) => { data += chunk; });
-    process.stdin.on('end', () => resolve(data.trim()));
-    process.stdin.on('error', reject);
-    setTimeout(() => {
-      process.stdin.destroy();
-      if (data) resolve(data.trim());
-      else reject(new Error('Stdin timeout — no input received'));
-    }, 10000);
+    if (process.stdin.isTTY) {
+      // Interactive mode: hide typed characters
+      process.stderr.write('Password: ');
+      process.stdin.setRawMode(true);
+      process.stdin.resume();
+      process.stdin.setEncoding('utf8');
+
+      let password = '';
+
+      const onData = (char) => {
+        const c = char.toString();
+        if (c === '\n' || c === '\r') {
+          cleanup();
+          process.stderr.write('\n');
+          resolve(password);
+        } else if (c === '\u0003') {
+          // Ctrl+C
+          cleanup();
+          process.stderr.write('\n');
+          process.exit(130);
+        } else if (c === '\u007f' || c === '\b') {
+          // Backspace
+          password = password.slice(0, -1);
+        } else {
+          password += c;
+        }
+      };
+
+      const cleanup = () => {
+        process.stdin.setRawMode(false);
+        process.stdin.pause();
+        process.stdin.removeListener('data', onData);
+      };
+
+      process.stdin.on('data', onData);
+    } else {
+      // Piped mode: read all data from stdin
+      let data = '';
+      process.stdin.setEncoding('utf8');
+      process.stdin.on('data', (chunk) => { data += chunk; });
+      process.stdin.on('end', () => resolve(data.trim()));
+      process.stdin.on('error', reject);
+      setTimeout(() => {
+        process.stdin.destroy();
+        if (data) resolve(data.trim());
+        else reject(new Error('Stdin timeout — no input received'));
+      }, 10000);
+    }
   });
 }
 
@@ -37,12 +76,9 @@ export async function passwordCommand(password, opts) {
 
     if (opts.stdin) {
       // --stdin: read password from stdin, ignore positional argument
-      if (!opts.quiet) {
-        process.stderr.write(chalk.gray('Reading password from stdin...\n'));
-      }
       const stdinPassword = await readStdin();
       if (!stdinPassword) {
-        process.stderr.write(chalk.red('Error: No password received from stdin.\n'));
+        process.stderr.write(chalk.red('Error: No password received.\n'));
         process.exitCode = EXIT.USAGE;
         return;
       }
@@ -51,7 +87,7 @@ export async function passwordCommand(password, opts) {
       // No password argument and no --stdin
       process.stderr.write(chalk.red('Error: Provide a password argument or use --stdin.\n'));
       process.stderr.write(chalk.gray('  shieldapi password "mypassword" --demo\n'));
-      process.stderr.write(chalk.gray('  echo -n "mypassword" | shieldapi password --stdin --demo\n'));
+      process.stderr.write(chalk.gray('  shieldapi password --stdin --demo\n'));
       process.exitCode = EXIT.USAGE;
       return;
     } else if (opts.hash) {
