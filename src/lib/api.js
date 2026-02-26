@@ -7,7 +7,7 @@ const BASE_URL = 'https://shield.vainplex.dev/api';
  * @param {Record<string, string>} params - Query parameters
  * @param {object} options
  * @param {boolean} options.demo - Use demo mode
- * @param {{ signer: object }|null} options.wallet - Wallet with x402 signer
+ * @param {{ client: object }|null} options.wallet - Wallet with viem client
  * @returns {Promise<object>} Parsed JSON response
  */
 export async function apiRequest(endpoint, params = {}, { demo = false, wallet = null } = {}) {
@@ -28,16 +28,24 @@ export async function apiRequest(endpoint, params = {}, { demo = false, wallet =
     return res.json();
   }
 
-  // Paid endpoint — need wallet with signer
-  if (!wallet?.signer) {
+  // Paid endpoint — need wallet
+  if (!wallet?.client) {
     throw new Error(
       'No wallet configured. Use --wallet <key> or set SHIELDAPI_WALLET_KEY environment variable.'
     );
   }
 
-  // Dynamic import to keep startup fast when not needed
+  // Dynamic imports to keep startup fast (PR-2: lazy loading)
+  const { x402Client } = await import('@x402/core/client');
+  const { registerExactEvmScheme } = await import('@x402/evm/exact/client');
   const { wrapFetchWithPayment } = await import('@x402/fetch');
-  const paidFetch = wrapFetchWithPayment(fetch, wallet.signer);
+
+  // Create x402 client with EVM scheme registered
+  const client = new x402Client();
+  registerExactEvmScheme(client, { signer: wallet.client });
+
+  // Wrap fetch with x402 payment handling
+  const paidFetch = wrapFetchWithPayment(fetch, client);
 
   const res = await paidFetch(url);
 
