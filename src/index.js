@@ -14,7 +14,7 @@ export function run(argv) {
   program
     .name('shieldapi')
     .description('🛡️  ShieldAPI CLI — Security intelligence from your terminal. Pay-per-request with USDC.')
-    .version('1.1.0')
+    .version('1.1.1')
     .option('--wallet <key>', 'Private key for x402 payments (or set SHIELDAPI_WALLET_KEY)')
     .option('--json', 'Output raw JSON instead of formatted output')
     .option('--no-color', 'Disable colors')

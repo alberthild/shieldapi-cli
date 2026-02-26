@@ -17,7 +17,6 @@ function readStdin() {
     rl.on('line', (line) => { data = line; rl.close(); });
     rl.on('close', () => resolve(data.trim()));
     rl.on('error', reject);
-    // Timeout after 10s
     setTimeout(() => { rl.close(); reject(new Error('Stdin timeout — no input received')); }, 10000);
   });
 }
@@ -27,6 +26,8 @@ function readStdin() {
  * Hashes locally with SHA-1, sends hash to API.
  */
 export async function passwordCommand(password, opts) {
+  let spinner = null;
+
   try {
     let hash;
 
@@ -62,7 +63,7 @@ export async function passwordCommand(password, opts) {
       }
     }
 
-    const spinner = opts.quiet ? null : ora({ text: 'Checking password...', stream: process.stderr }).start();
+    spinner = opts.quiet ? null : ora({ text: 'Checking password...', stream: process.stderr }).start();
     const wallet = opts.demo ? null : resolveWallet(opts);
 
     const data = await apiRequest('check-password', { hash }, {
@@ -80,7 +81,7 @@ export async function passwordCommand(password, opts) {
 
     process.exitCode = exitCodeFromResult(data);
   } catch (err) {
-    if (!opts.quiet) process.stderr.write(chalk.red(`✖ ${err.message}\n`));
+    spinner?.fail(err.message);
     process.exitCode = exitCodeFromError(err);
   }
 }
