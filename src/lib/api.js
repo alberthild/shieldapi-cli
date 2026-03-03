@@ -73,3 +73,50 @@ export class ApiError extends Error {
     this.status = status;
   }
 }
+
+/**
+ * POST request for Phase 2 endpoints (scan-skill, check-prompt).
+ * Uses @x402/fetch for paid requests, plain fetch for demo.
+ */
+export async function apiRequestPost(endpoint, body = {}, { demo = false, wallet = null } = {}) {
+  const query = demo ? '?demo=true' : '';
+  const url = `${BASE_URL}/${endpoint}${query}`;
+
+  const fetchOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  };
+
+  if (demo || endpoint === 'health') {
+    const res = await fetch(url, fetchOptions);
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new ApiError(res.status, body || res.statusText);
+    }
+    return res.json();
+  }
+
+  if (!wallet?.signer) {
+    throw new Error(
+      'No wallet configured. Use --wallet <key> or set SHIELDAPI_WALLET_KEY environment variable.'
+    );
+  }
+
+  const { x402Client } = await import('@x402/core/client');
+  const { registerExactEvmScheme } = await import('@x402/evm/exact/client');
+  const { wrapFetchWithPayment } = await import('@x402/fetch');
+
+  const client = new x402Client();
+  registerExactEvmScheme(client, { signer: wallet.signer });
+
+  const paidFetch = wrapFetchWithPayment(fetch, client);
+  const res = await paidFetch(url, fetchOptions);
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new ApiError(res.status, body || res.statusText);
+  }
+
+  return res.json();
+}

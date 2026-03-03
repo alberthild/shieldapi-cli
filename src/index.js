@@ -10,6 +10,8 @@ import { urlCommand } from './commands/url.js';
 import { scanCommand } from './commands/scan.js';
 import { healthCommand } from './commands/health.js';
 import { hashCommand } from './commands/hash.js';
+import { scanSkillCommand } from './commands/scanSkill.js';
+import { checkPromptCommand } from './commands/checkPrompt.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
@@ -110,5 +112,28 @@ export function run(argv) {
       hashCommand(password, { ...globalOpts, ...cmdOpts });
     });
 
+  program
+    .command('scan-skill')
+    .description('Scan an AI skill or plugin for security issues (8 risk categories)')
+    .argument('[target]', 'Path to SKILL.md, directory, or raw skill content')
+    .option('--demo', 'Use demo mode (free, no wallet needed)')
+    .action((target, cmdOpts, cmd) => {
+      const globalOpts = cmd.parent.opts();
+      scanSkillCommand(target, { ...globalOpts, ...cmdOpts });
+    });
+
+  program
+    .command('check-prompt')
+    .description('Check text for prompt injection patterns (200+ detectors)')
+    .argument('[prompt]', 'Text to analyze (or use --stdin)')
+    .option('--demo', 'Use demo mode (free, no wallet needed)')
+    .option('--stdin', 'Read prompt from stdin')
+    .option('--context <context>', 'Context hint: user-input, skill-prompt, system-prompt', 'user-input')
+    .action((prompt, cmdOpts, cmd) => {
+      const globalOpts = cmd.parent.opts();
+      checkPromptCommand(prompt, { ...globalOpts, ...cmdOpts });
+    });
+
   program.parse(argv);
+
 }
