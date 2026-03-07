@@ -4,7 +4,7 @@
 
 The first x402-powered security CLI. Check passwords, emails, domains, IPs, URLs — plus **AI-native prompt injection detection** and **skill security scanning**.
 
-**🆓 Free Tier (v2.3.0):** 3 real API calls per endpoint per day — no wallet needed.  
+**🆓 Free Tier (v2.3.0):** 10 real API calls per endpoint per day — no wallet needed.  
 **💰 Unlimited:** Pay-per-request with USDC micropayments via x402 ($0.001–$0.02/call). No API keys, no subscriptions.
 
 
@@ -12,19 +12,19 @@ The first x402-powered security CLI. Check passwords, emails, domains, IPs, URLs
 
 | Tier | Access | Limit |
 |------|--------|-------|
-| 🆓 **Free** | No wallet needed | 3 calls/endpoint/day (real results) |
+| 🆓 **Free** | No wallet needed | 10 calls/endpoint/day (real results) |
 | 💰 **Paid** | x402 USDC on Base | Unlimited |
 
 | Endpoint | Free/Day | Paid Price |
 |----------|----------|------------|
-| check-password | 3 | $0.001 |
-| check-email | 3 | $0.005 |
-| check-domain | 3 | $0.003 |
-| check-ip | 3 | $0.002 |
-| check-url | 3 | $0.003 |
-| check-prompt | 3 | $0.005 |
-| full-scan | 1 | $0.01 |
-| scan-skill | 1 | $0.02 |
+| check-password | 10 | $0.001 |
+| check-email | 10 | $0.005 |
+| check-domain | 10 | $0.003 |
+| check-ip | 10 | $0.002 |
+| check-url | 10 | $0.003 |
+| check-prompt | 10 | $0.005 |
+| full-scan | 3 | $0.01 |
+| scan-skill | 3 | $0.02 |
 
 ## 🆕 NEW: AI Security Features
 
