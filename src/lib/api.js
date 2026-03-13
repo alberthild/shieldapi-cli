@@ -11,6 +11,10 @@ const BASE_URL = 'https://shield.vainplex.dev/api';
  * @returns {Promise<object>} Parsed JSON response
  */
 export async function apiRequest(endpoint, params = {}, { demo = false, wallet = null } = {}) {
+  if (!demo && !wallet?.signer && endpoint !== 'health') {
+    console.warn('\x1b[33m⚠️  No wallet configured. Falling back to free demo mode (--demo).\x1b[0m');
+    demo = true;
+  }
   if (demo) {
     params.demo = 'true';
   }
@@ -79,6 +83,10 @@ export class ApiError extends Error {
  * Uses @x402/fetch for paid requests, plain fetch for demo.
  */
 export async function apiRequestPost(endpoint, body = {}, { demo = false, wallet = null } = {}) {
+  if (!demo && !wallet?.signer && endpoint !== 'health') {
+    console.warn('\x1b[33m⚠️  No wallet configured. Falling back to free demo mode (--demo).\x1b[0m');
+    demo = true;
+  }
   const query = demo ? '?demo=true' : '';
   const url = `${BASE_URL}/${endpoint}${query}`;
 
