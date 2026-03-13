@@ -43,5 +43,8 @@
     "commander": "^12.1.0",
     "ora": "^8.1.0",
     "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "cli-spinners": "^3.4.0"
   }
 }

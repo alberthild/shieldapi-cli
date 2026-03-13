@@ -12,6 +12,7 @@ import { healthCommand } from './commands/health.js';
 import { hashCommand } from './commands/hash.js';
 import { scanSkillCommand } from './commands/scanSkill.js';
 import { checkPromptCommand } from './commands/checkPrompt.js';
+import { checkMcpTrustCommand } from './commands/checkMcpTrust.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
@@ -132,6 +133,16 @@ export function run(argv) {
     .action((prompt, cmdOpts, cmd) => {
       const globalOpts = cmd.parent.opts();
       checkPromptCommand(prompt, { ...globalOpts, ...cmdOpts });
+    });
+
+  program
+    .command('check-mcp-trust')
+    .description('Check MCP Trust score for an agent endpoint')
+    .argument('<endpoint>', 'HTTPS URL to the MCP endpoint')
+    .option('--demo', 'Use demo mode (free, no wallet needed)')
+    .action((endpoint, cmdOpts, cmd) => {
+      const globalOpts = cmd.parent.opts();
+      checkMcpTrustCommand(endpoint, { ...globalOpts, ...cmdOpts });
     });
 
   program.parse(argv);

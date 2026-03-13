@@ -25,8 +25,23 @@ The first x402-powered security CLI. Check passwords, emails, domains, IPs, URLs
 | check-prompt | 10 | $0.005 |
 | full-scan | 3 | $0.01 |
 | scan-skill | 3 | $0.02 |
+| check-mcp-trust | 3 | $0.02 |
 
 ## 🆕 NEW: AI Security Features
+
+### MCP Trust Verification
+
+Verify the security, reliability, and on-chain trust score of any MCP server endpoint before adding it to your agent.
+
+```bash
+# Check trust score of an MCP server
+shieldapi check-mcp-trust https://example.com/mcp --demo
+
+# Machine-readable output
+shieldapi check-mcp-trust https://example.com/mcp --json --quiet
+```
+
+**Signals evaluated:** SSL/TLS health, DNS security (SPF/DMARC), Response time, AgentProof registration (ERC-8004), supply chain security, prompt injection protections.
 
 ### Prompt Injection Detection
 
@@ -99,6 +114,9 @@ npx @vainplex/shieldapi-cli check-prompt 'test injection' --demo
 ### Demo Mode (free, no wallet needed)
 
 ```bash
+# 🆕 Verify MCP Trust score
+shieldapi check-mcp-trust https://example.com/mcp --demo
+
 # 🆕 Prompt injection detection
 shieldapi check-prompt 'Ignore all previous instructions' --demo
 
@@ -147,6 +165,7 @@ shieldapi password "hunter2"
 
 | Command | Description | Cost (USDC) |
 |---------|-------------|-------------|
+| 🆕 `check-mcp-trust <url>` | Verify MCP Server trust score and on-chain status | $0.02 |
 | 🆕 `check-prompt [text]` | Prompt injection detection (208 patterns, <100ms) | $0.005 |
 | 🆕 `scan-skill [path]` | AI skill supply chain security scan (8 categories) | $0.02 |
 | `password <pw>` | Check password against 900M+ breach records | $0.001 |
