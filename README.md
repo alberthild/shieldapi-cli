@@ -15,6 +15,8 @@ The first x402-powered security CLI. Check passwords, emails, domains, IPs, URLs
 | 🆓 **Free** | No wallet needed | 10 calls/endpoint/day (real results) |
 | 💰 **Paid** | x402 USDC on Base | Unlimited |
 
+### Prices per Endpoint
+
 | Endpoint | Free/Day | Paid Price |
 |----------|----------|------------|
 | check-password | 10 | $0.001 |
