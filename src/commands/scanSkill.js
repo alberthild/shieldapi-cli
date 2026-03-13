@@ -1,7 +1,7 @@
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, extname, basename } from 'node:path';
 import chalk from 'chalk';
-import ora from 'ora';
+import { createSpinner, delay, glitchPrint } from "../lib/ui.js";
 import { apiRequestPost } from '../lib/api.js';
 import { resolveWallet } from '../lib/wallet.js';
 import { riskBadge, sectionHeader, kvLine, formatNumber } from '../lib/formatter.js';
@@ -45,7 +45,7 @@ function loadSkillFiles(path) {
 }
 
 export async function scanSkillCommand(target, opts) {
-  const spinner = opts.quiet ? null : ora({ text: `Scanning skill: ${target || 'stdin'}`, stream: process.stderr }).start();
+  const spinner = opts.quiet ? null : createSpinner(`Scanning skill: ${target || 'stdin'}`).start();
 
   try {
     let body = {};

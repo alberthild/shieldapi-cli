@@ -1,19 +1,15 @@
 import { createHash } from 'node:crypto';
-import ora from 'ora';
 import chalk from 'chalk';
 import { apiRequest } from '../lib/api.js';
 import { resolveWallet } from '../lib/wallet.js';
 import { formatScan } from '../lib/formatter.js';
 import { exitCodeFromResult, exitCodeFromError, EXIT } from '../lib/exit.js';
+import { createSpinner, delay, glitchPrint } from '../lib/ui.js';
 
-/**
- * Run a full security scan with multiple targets.
- */
 export async function scanCommand(opts) {
   const params = {};
 
   if (opts.password) {
-    // Shell history warning (C2: scan --password leak)
     if (!opts.quiet && process.stderr.isTTY) {
       process.stderr.write(
         chalk.yellow('⚠  Password may appear in shell history. Use `shieldapi password --stdin` for sensitive passwords.\n')
@@ -32,7 +28,12 @@ export async function scanCommand(opts) {
     return;
   }
 
-  const spinner = opts.quiet ? null : ora({ text: 'Running full security scan...', stream: process.stderr }).start();
+  if (!opts.quiet && !opts.json && process.stderr.isTTY) {
+    await glitchPrint('[SHIELDAPI] Initializing full-scan...');
+    await delay(150);
+  }
+
+  const spinner = opts.quiet ? null : createSpinner('Running full security scan...').start();
 
   try {
     const wallet = opts.demo ? null : resolveWallet(opts);

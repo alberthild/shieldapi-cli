@@ -1,12 +1,12 @@
 import chalk from 'chalk';
-import ora from 'ora';
+import { createSpinner, delay, glitchPrint } from "../lib/ui.js";
 import { apiRequestPost } from '../lib/api.js';
 import { resolveWallet } from '../lib/wallet.js';
 import { riskBadge, sectionHeader } from '../lib/formatter.js';
 import { EXIT } from '../lib/exit.js';
 
 export async function checkPromptCommand(prompt, opts) {
-  const spinner = opts.quiet ? null : ora({ text: 'Analyzing prompt for injection patterns...', stream: process.stderr }).start();
+  const spinner = opts.quiet ? null : createSpinner('Analyzing prompt for injection patterns...').start();
 
   try {
     let inputPrompt = prompt;

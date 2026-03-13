@@ -1,12 +1,12 @@
 import chalk from 'chalk';
-import ora from 'ora';
+import { createSpinner, delay, glitchPrint } from "../lib/ui.js";
 import { apiRequestPost } from '../lib/api.js';
 import { resolveWallet } from '../lib/wallet.js';
 import { sectionHeader, kvLine, riskBadge } from '../lib/formatter.js';
 import { EXIT, exitCodeFromError } from '../lib/exit.js';
 
 export async function checkMcpTrustCommand(endpoint, opts) {
-  const spinner = opts.quiet ? null : ora({ text: `Checking MCP Trust for: ${endpoint}`, stream: process.stderr }).start();
+  const spinner = opts.quiet ? null : createSpinner(`Checking MCP Trust for: ${endpoint}`).start();
 
   try {
     const wallet = opts.demo ? null : resolveWallet(opts);

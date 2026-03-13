@@ -1,13 +1,15 @@
-import ora from 'ora';
 import { apiRequest } from '../lib/api.js';
 import { formatHealth } from '../lib/formatter.js';
 import { EXIT } from '../lib/exit.js';
+import { createSpinner, glitchPrint, delay } from '../lib/ui.js';
 
-/**
- * Check API health status.
- */
 export async function healthCommand(opts) {
-  const spinner = opts.quiet ? null : ora({ text: 'Checking API health...', stream: process.stderr }).start();
+  if (!opts.quiet && !opts.json && process.stderr.isTTY) {
+    await glitchPrint('[SHIELDAPI] Initializing health check...');
+    await delay(150);
+  }
+
+  const spinner = opts.quiet ? null : createSpinner('Checking API health...').start();
 
   try {
     const data = await apiRequest('health', {}, { demo: opts.demo });
