@@ -1,6 +1,6 @@
 {
   "name": "@vainplex/shieldapi-cli",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Security intelligence from your terminal. Pay-per-request with USDC.",
   "type": "module",
   "bin": {
