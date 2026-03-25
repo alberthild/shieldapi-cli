@@ -26,6 +26,7 @@ The first x402-powered security CLI. Check passwords, emails, domains, IPs, URLs
 | check-url | 10 | $0.003 |
 | check-prompt | 10 | $0.005 |
 | check-package | 10 | $0.01 |
+| check-package | 10 | $0.01 |
 | full-scan | 3 | $0.01 |
 | scan-skill | 3 | $0.02 |
 | check-mcp-trust | 3 | $0.02 |
