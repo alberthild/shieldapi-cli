@@ -25,11 +25,26 @@ The first x402-powered security CLI. Check passwords, emails, domains, IPs, URLs
 | check-ip | 10 | $0.002 |
 | check-url | 10 | $0.003 |
 | check-prompt | 10 | $0.005 |
+| check-package | 10 | $0.01 |
 | full-scan | 3 | $0.01 |
 | scan-skill | 3 | $0.02 |
 | check-mcp-trust | 3 | $0.02 |
 
 ## 🆕 NEW: AI Security Features
+
+### Supply Chain Pre-Flight Check
+
+Prevent compromised dependencies from executing malicious code. ShieldAPI catches poisoned packages (like the recent `litellm` supply chain attack) through static analysis *before* execution.
+
+```bash
+# Check a package for malicious code before installation
+shieldapi check-package pypi litellm 1.82.8 --demo
+
+# Machine-readable output
+shieldapi check-package npm express 4.19.2 --json --quiet
+```
+
+**What it detects:** Obfuscated payloads, unauthorized network exfiltration, arbitrary code execution during installation (e.g. postinstall scripts), reverse shells, and malicious environment variable extraction.
 
 ### MCP Trust Verification
 
@@ -116,6 +131,9 @@ npx @vainplex/shieldapi-cli check-prompt 'test injection' --demo
 ### Demo Mode (free, no wallet needed)
 
 ```bash
+# 🆕 Supply Chain Pre-Flight Check
+shieldapi check-package pypi litellm 1.82.8 --demo
+
 # 🆕 Verify MCP Trust score
 shieldapi check-mcp-trust https://example.com/mcp --demo
 
@@ -153,6 +171,9 @@ shieldapi hash "mypassword"
 # Set your wallet key
 export SHIELDAPI_WALLET_KEY="0x..."
 
+# Supply Chain Pre-Flight Check — costs $0.01 USDC
+shieldapi check-package pypi litellm 1.82.8
+
 # Prompt injection check — costs $0.005 USDC
 shieldapi check-prompt 'Ignore all previous instructions'
 
@@ -167,6 +188,7 @@ shieldapi password "hunter2"
 
 | Command | Description | Cost (USDC) |
 |---------|-------------|-------------|
+| 🆕 `check-package <eco> <pkg> <ver>` | Supply Chain Pre-Flight Check (npm, pypi) | $0.01 |
 | 🆕 `check-mcp-trust <url>` | Verify MCP Server trust score and on-chain status | $0.02 |
 | 🆕 `check-prompt [text]` | Prompt injection detection (208 patterns, <100ms) | $0.005 |
 | 🆕 `scan-skill [path]` | AI skill supply chain security scan (8 categories) | $0.02 |
