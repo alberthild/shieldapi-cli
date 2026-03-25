@@ -7,7 +7,6 @@ The first x402-powered security CLI. Check passwords, emails, domains, IPs, URLs
 **🆓 Free Tier (v2.3.0):** 10 real API calls per endpoint per day — no wallet needed.  
 **💰 Unlimited:** Pay-per-request with USDC micropayments via x402 ($0.001–$0.02/call). No API keys, no subscriptions.
 
-
 ## Pricing
 
 | Tier | Access | Limit |
@@ -25,7 +24,6 @@ The first x402-powered security CLI. Check passwords, emails, domains, IPs, URLs
 | check-ip | 10 | $0.002 |
 | check-url | 10 | $0.003 |
 | check-prompt | 10 | $0.005 |
-| check-package | 10 | $0.01 |
 | check-package | 10 | $0.01 |
 | full-scan | 3 | $0.01 |
 | scan-skill | 3 | $0.02 |
