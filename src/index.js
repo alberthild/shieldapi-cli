@@ -13,6 +13,7 @@ import { hashCommand } from './commands/hash.js';
 import { scanSkillCommand } from './commands/scanSkill.js';
 import { checkPromptCommand } from './commands/checkPrompt.js';
 import { checkMcpTrustCommand } from './commands/checkMcpTrust.js';
+import { checkPackageCommand } from './commands/checkPackage.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
@@ -143,6 +144,18 @@ export function run(argv) {
     .action((endpoint, cmdOpts, cmd) => {
       const globalOpts = cmd.parent.opts();
       checkMcpTrustCommand(endpoint, { ...globalOpts, ...cmdOpts });
+    });
+
+  program
+    .command('check-package')
+    .description('Supply Chain Pre-Flight Check for packages')
+    .argument('<ecosystem>', 'Ecosystem (e.g. npm, pypi)')
+    .argument('<name>', 'Package name')
+    .argument('[version]', 'Package version (optional)')
+    .option('--demo', 'Use demo mode (free, no wallet needed)')
+    .action((ecosystem, name, version, cmdOpts, cmd) => {
+      const globalOpts = cmd.parent.opts();
+      checkPackageCommand(ecosystem, name, version, { ...globalOpts, ...cmdOpts });
     });
 
   program.parse(argv);
